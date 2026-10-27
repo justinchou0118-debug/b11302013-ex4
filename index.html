@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="測驗 HTML、CSS 與 JavaScript 的網頁設計基礎知識。">
+	<title>網頁設計基礎測驗</title>
+	<style>
+		/* 用色彩變數集中管理，之後要調整配色會更容易。 */
+		:root {
+			color-scheme: light;
+			--ink: #203238;
+			--muted: #607176;
+			--paper: #ffffff;
+			--page: #edf4f2;
+			--line: #d7e2df;
+			--accent: #176f67;
+			--accent-dark: #10564f;
+			--accent-light: #e4f2ee;
+			--correct: #17653e;
+			--correct-bg: #e7f5eb;
+			--incorrect: #a43932;
+			--incorrect-bg: #fff0ed;
+		}
+
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			min-width: 320px;
+			margin: 0;
+			color: var(--ink);
+			background:
+				radial-gradient(ellipse at 90% 4%, rgba(201, 230, 219, 0.58), transparent 32rem),
+				var(--page);
+			font-family: "Segoe UI", "Noto Sans TC", sans-serif;
+			line-height: 1.65;
+		}
+
+		.top-rule {
+			height: 7px;
+			background: linear-gradient(90deg, #176f67 0 62%, #e4a35a 62% 78%, #d96f5d 78%);
+		}
+
+		main {
+			width: min(100% - 32px, 780px);
+			margin: 48px auto 64px;
+		}
+
+		.intro {
+			padding: 0 4px 24px;
+			animation: arrive 420ms ease-out both;
+		}
+
+		.eyebrow {
+			margin: 0 0 8px;
+			color: var(--accent);
+			font-size: 0.82rem;
+			font-weight: 750;
+			letter-spacing: 0.08em;
+		}
+
+		h1 {
+			margin: 0;
+			font-family: Georgia, "Noto Serif TC", serif;
+			font-size: clamp(1.8rem, 7vw, 2.5rem);
+			line-height: 1.25;
+		}
+
+		.intro p:last-child {
+			margin: 12px 0 0;
+			color: var(--muted);
+		}
+
+		.quiz-panel {
+			overflow: hidden;
+			border: 1px solid var(--line);
+			border-radius: 8px;
+			background: var(--paper);
+			box-shadow: 0 14px 36px rgba(32, 50, 56, 0.07);
+			animation: arrive 520ms 70ms ease-out both;
+		}
+
+		.quiz-meta {
+			display: flex;
+			justify-content: space-between;
+			gap: 12px;
+			padding: 16px 24px;
+			border-bottom: 1px solid var(--line);
+			color: var(--muted);
+			font-size: 0.9rem;
+		}
+
+		#question-list {
+			padding: 0 24px;
+		}
+
+		.question {
+			min-width: 0;
+			margin: 0;
+			padding: 22px 0 24px;
+			border: 0;
+			border-bottom: 1px solid var(--line);
+		}
+
+		.question legend {
+			width: 100%;
+			padding: 0;
+			font-weight: 700;
+		}
+
+		.question-title {
+			display: flex;
+			align-items: flex-start;
+			gap: 10px;
+		}
+
+		.question-number {
+			flex: 0 0 auto;
+			color: var(--accent);
+			font-variant-numeric: tabular-nums;
+		}
+
+		.category {
+			display: inline-block;
+			margin: 0 0 8px 34px;
+			padding: 1px 8px;
+			border-radius: 4px;
+			background: var(--accent-light);
+			color: var(--accent-dark);
+			font-size: 0.75rem;
+			font-weight: 700;
+		}
+
+		.options {
+			display: grid;
+			gap: 8px;
+			margin: 13px 0 0 34px;
+		}
+
+		.option {
+			display: flex;
+			align-items: flex-start;
+			gap: 10px;
+			padding: 9px 11px;
+			border: 1px solid transparent;
+			border-radius: 6px;
+			color: #34484d;
+			cursor: pointer;
+			transition: background-color 140ms ease, border-color 140ms ease;
+		}
+
+		.option:hover {
+			border-color: var(--line);
+			background: #f7faf9;
+		}
+
+		.option:has(input:checked) {
+			border-color: #9dc9bd;
+			background: var(--accent-light);
+		}
+
+		.option input {
+			flex: 0 0 auto;
+			width: 18px;
+			height: 18px;
+			margin: 3px 0 0;
+			accent-color: var(--accent);
+		}
+
+		.actions {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 10px;
+			padding: 20px 24px 24px;
+		}
+
+		button {
+			min-height: 44px;
+			padding: 9px 18px;
+			border: 1px solid var(--accent);
+			border-radius: 6px;
+			font: inherit;
+			font-weight: 700;
+			cursor: pointer;
+			transition: background-color 140ms ease, transform 140ms ease;
+		}
+
+		button:hover {
+			transform: translateY(-1px);
+		}
+
+		button:focus-visible,
+		.option:focus-within {
+			outline: 3px solid #e4a35a;
+			outline-offset: 2px;
+		}
+
+		.submit-button {
+			background: var(--accent);
+			color: #fff;
+		}
+
+		.submit-button:hover {
+			background: var(--accent-dark);
+		}
+
+		.reset-button {
+			background: #fff;
+			color: var(--accent-dark);
+		}
+
+		.reset-button:hover {
+			background: #f2f7f5;
+		}
+
+		#results {
+			margin: 0 24px 24px;
+			padding: 20px;
+			border: 1px solid var(--line);
+			border-left: 5px solid var(--accent);
+			border-radius: 6px;
+			background: #f8fbfa;
+		}
+
+		#results[hidden] {
+			display: none;
+		}
+
+		.result-heading {
+			margin: 0;
+			font-size: 1.2rem;
+		}
+
+		.score {
+			margin: 4px 0 0;
+			color: var(--accent-dark);
+			font-size: 1.5rem;
+			font-weight: 800;
+			font-variant-numeric: tabular-nums;
+		}
+
+		.omission-note {
+			margin: 8px 0 0;
+			color: var(--incorrect);
+			font-weight: 700;
+		}
+
+		.result-list {
+			display: grid;
+			gap: 8px;
+			margin: 16px 0 0;
+			padding: 0;
+			list-style: none;
+		}
+
+		.result-item {
+			padding: 10px 12px;
+			border-radius: 4px;
+			background: var(--paper);
+			font-size: 0.94rem;
+		}
+
+		.result-item.is-correct {
+			border-left: 3px solid var(--correct);
+		}
+
+		.result-item.is-incorrect {
+			border-left: 3px solid var(--incorrect);
+		}
+
+		.result-status {
+			margin-right: 6px;
+			font-weight: 800;
+		}
+
+		.is-correct .result-status {
+			color: var(--correct);
+		}
+
+		.is-incorrect .result-status {
+			color: var(--incorrect);
+		}
+
+		@keyframes arrive {
+			from { opacity: 0; transform: translateY(8px); }
+			to { opacity: 1; transform: translateY(0); }
+		}
+
+		@media (max-width: 520px) {
+			main {
+				width: min(100% - 20px, 780px);
+				margin: 28px auto 40px;
+			}
+
+			.quiz-meta {
+				padding: 14px 16px;
+			}
+
+			#question-list {
+				padding: 0 16px;
+			}
+
+			.options,
+			.category {
+				margin-left: 0;
+			}
+
+			.actions {
+				padding: 18px 16px;
+			}
+
+			#results {
+				margin: 0 16px 16px;
+				padding: 16px;
+			}
+		}
+
+		@media (prefers-reduced-motion: reduce) {
+			*, *::before, *::after {
+				scroll-behavior: auto !important;
+				animation-duration: 0.01ms !important;
+				transition-duration: 0.01ms !important;
+			}
+		}
+	</style>
+</head>
+<body>
+	<div class="top-rule" aria-hidden="true"></div>
+	<main>
+		<header class="intro">
+			<p class="eyebrow">WEB DESIGN · 基礎練習</p>
+			<h1>網頁設計基礎測驗</h1>
+			<p>測驗 HTML、CSS 與 JavaScript 的入門知識，看看你掌握了多少。</p>
+		</header>
+
+		<section class="quiz-panel" aria-label="網頁設計測驗">
+			<div class="quiz-meta">
+				<span>共 10 題，請選出每題最適合的答案</span>
+				<span>每題 10 分</span>
+			</div>
+
+			<form id="quiz-form">
+				<div id="question-list"></div>
+				<div class="actions">
+					<button class="submit-button" type="submit">送出答案</button>
+					<button class="reset-button" id="reset-button" type="button">重新測驗</button>
+				</div>
+			</form>
+
+			<section id="results" aria-live="polite" aria-labelledby="result-heading" hidden>
+				<h2 class="result-heading" id="result-heading">測驗結果</h2>
+				<p class="score" id="score"></p>
+				<p class="omission-note" id="omission-note"></p>
+				<ol class="result-list" id="result-list"></ol>
+			</section>
+		</section>
+	</main>
+
+	<script>
+		// 每題的 options 是四個選項；answer 是正確選項的索引（從 0 開始）。
+		const questions = [
+			{
+				category: "HTML",
+				text: "HTML 主要用來做什麼？",
+				options: ["設定網頁資料庫", "描述網頁內容與結構", "讓網頁自動連上網路", "壓縮圖片檔案"],
+				answer: 1
+			},
+			{
+				category: "HTML",
+				text: "哪個 HTML 標籤通常代表網頁中最重要的標題？",
+				options: ["<p>", "<title>", "<h1>", "<strong>"],
+				answer: 2
+			},
+			{
+				category: "HTML",
+				text: "要建立連往其他網頁的超連結，應使用哪個標籤？",
+				options: ["<a>", "<link>", "<nav>", "<href>"],
+				answer: 0
+			},
+			{
+				category: "HTML",
+				text: "在圖片標籤中，哪個屬性可提供圖片的文字替代說明？",
+				options: ["title", "src", "alt", "caption"],
+				answer: 2
+			},
+			{
+				category: "CSS",
+				text: "CSS 最主要的用途是什麼？",
+				options: ["設計網頁外觀與版面", "儲存使用者密碼", "建立 HTML 標籤", "傳送電子郵件"],
+				answer: 0
+			},
+			{
+				category: "CSS",
+				text: "哪個 CSS 屬性可以設定文字顏色？",
+				options: ["font-style", "text-color", "color", "background"],
+				answer: 2
+			},
+			{
+				category: "CSS",
+				text: "CSS 中，哪一種選擇器會選取 class 名稱為 notice 的元素？",
+				options: ["#notice", "notice", ".notice", "*notice"],
+				answer: 2
+			},
+			{
+				category: "JavaScript",
+				text: "JavaScript 常用來為網頁加入什麼功能？",
+				options: ["互動與動態行為", "網頁的標題層級", "圖片的實際像素", "伺服器的電源"],
+				answer: 0
+			},
+			{
+				category: "JavaScript",
+				text: "在 JavaScript 中，哪個關鍵字可以宣告可重新指定值的變數？",
+				options: ["const", "let", "style", "select"],
+				answer: 1
+			},
+			{
+				category: "JavaScript",
+				text: "哪個方法可以依照 id 找到 HTML 中的元素？",
+				options: ["document.getElementById()", "document.createStyle()", "window.findHTML()", "console.getElement()"],
+				answer: 0
+			}
+		];
+
+		const questionList = document.querySelector("#question-list");
+		const quizForm = document.querySelector("#quiz-form");
+		const results = document.querySelector("#results");
+
+		// 根據題目資料建立單選題，讓題目內容與版面程式分開管理。
+		function renderQuestions() {
+			questions.forEach((question, questionIndex) => {
+				const fieldset = document.createElement("fieldset");
+				fieldset.className = "question";
+
+				const legend = document.createElement("legend");
+				const title = document.createElement("span");
+				title.className = "question-title";
+
+				const number = document.createElement("span");
+				number.className = "question-number";
+				number.textContent = `第 ${questionIndex + 1} 題`;
+
+				const prompt = document.createElement("span");
+				prompt.textContent = question.text;
+				title.append(number, prompt);
+				legend.append(title);
+
+				const category = document.createElement("span");
+				category.className = "category";
+				category.textContent = question.category;
+
+				const options = document.createElement("div");
+				options.className = "options";
+
+				question.options.forEach((option, optionIndex) => {
+					const label = document.createElement("label");
+					label.className = "option";
+
+					const input = document.createElement("input");
+					input.type = "radio";
+					input.name = `question-${questionIndex}`;
+					input.value = String(optionIndex);
+
+					const optionText = document.createElement("span");
+					optionText.textContent = option;
+					label.append(input, optionText);
+					options.append(label);
+				});
+
+				fieldset.append(legend, category, options);
+				questionList.append(fieldset);
+			});
+		}
+
+		// 送出時逐題比對答案，每答對一題加 10 分，並列出正確答案。
+		quizForm.addEventListener("submit", (event) => {
+			event.preventDefault();
+
+			let score = 0;
+			let unanswered = 0;
+			const resultList = document.querySelector("#result-list");
+			resultList.replaceChildren();
+
+			questions.forEach((question, questionIndex) => {
+				const selected = quizForm.querySelector(`input[name="question-${questionIndex}"]:checked`);
+				const selectedIndex = selected ? Number(selected.value) : -1;
+				const isCorrect = selectedIndex === question.answer;
+
+				if (selectedIndex === -1) {
+					unanswered += 1;
+				} else if (isCorrect) {
+					score += 10;
+				}
+
+				const item = document.createElement("li");
+				item.className = `result-item ${isCorrect ? "is-correct" : "is-incorrect"}`;
+
+				const status = document.createElement("span");
+				status.className = "result-status";
+				status.textContent = isCorrect ? "答對" : "答錯";
+
+				const answerText = document.createElement("span");
+				const chosenText = selected ? question.options[selectedIndex] : "未作答";
+				answerText.textContent = `第 ${questionIndex + 1} 題：你的答案：${chosenText}；正確答案：${question.options[question.answer]}`;
+
+				item.append(status, answerText);
+				resultList.append(item);
+			});
+
+			document.querySelector("#score").textContent = `總分：${score} / 100 分`;
+			document.querySelector("#omission-note").textContent = unanswered > 0
+				? `提醒：你有 ${unanswered} 題未作答，未作答的題目不計分。`
+				: "太好了，你已完成所有題目！";
+			results.hidden = false;
+			results.scrollIntoView({ behavior: "smooth", block: "start" });
+		});
+
+		// 清除作答與結果，讓測驗回到剛開始的狀態。
+		document.querySelector("#reset-button").addEventListener("click", () => {
+			quizForm.reset();
+			results.hidden = true;
+			document.querySelector("#score").textContent = "";
+			document.querySelector("#omission-note").textContent = "";
+			document.querySelector("#result-list").replaceChildren();
+			document.querySelector("#quiz-form").scrollIntoView({ behavior: "smooth", block: "start" });
+		});
+
+		renderQuestions();
+	</script>
+</body>
+</html>
